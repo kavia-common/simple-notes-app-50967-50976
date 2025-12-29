@@ -1,16 +1,32 @@
 :root {
-  --color-primary: #3b82f6;
-  --color-success: #06b6d4;
-  --color-error: #EF4444;
-  --color-secondary: #64748b;
+  /* Monochrome palette */
+  --black: #000000;
+  --white: #ffffff;
 
-  --bg: #f9fafb;
-  --surface: #ffffff;
-  --text: #111827;
+  --gray-50: #fafafa;
+  --gray-100: #f5f5f5;
+  --gray-200: #e5e5e5;
+  --gray-300: #d4d4d4;
+  --gray-500: #737373;
+  --gray-700: #404040;
+  --gray-900: #171717;
 
-  --border: #e5e7eb;
-  --muted: #6b7280;
+  /* Semantic tokens mapped to monochrome */
+  --color-primary: var(--black); /* used for primary controls/backgrounds */
+  --color-success: var(--black);
+  --color-error: var(--black);
+  --color-secondary: var(--gray-700);
+
+  --bg: var(--gray-50);
+  --surface: var(--white);
+  --text: var(--black);
+
+  --border: var(--gray-200);
+  --muted: var(--gray-500);
   --shadow: 0 10px 25px rgba(0,0,0,0.08);
+
+  /* Focus ring */
+  --focus-ring: 0 0 0 3px rgba(0,0,0,0.2);
 }
 
 * { box-sizing: border-box; }
@@ -19,7 +35,7 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji");
 }
 
 .app-root {
@@ -62,8 +78,8 @@ body {
   transition: border-color .15s ease, box-shadow .15s ease;
 }
 .search-input:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+  border-color: var(--black);
+  box-shadow: var(--focus-ring);
 }
 
 /* Container */
@@ -127,49 +143,54 @@ body {
   align-items: center;
   gap: .35rem;
   font-size: .75rem;
-  color: var(--secondary);
-  background: #f3f4f6;
+  color: var(--gray-700);
+  background: var(--gray-100);
   border: 1px solid var(--border);
   padding: .25rem .5rem;
   border-radius: 999px;
 }
 
-/* Buttons */
+/* Buttons - monochrome */
 .btn-primary {
-  background: var(--color-primary);
-  color: white;
-  border: none;
+  background: var(--black);
+  color: var(--white);
+  border: 1px solid var(--black);
   border-radius: 10px;
   padding: .6rem .9rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  transition: transform .08s ease, box-shadow .2s ease, background .2s ease;
-  box-shadow: 0 6px 20px rgba(59,130,246,0.25);
+  transition: transform .08s ease, box-shadow .2s ease, background .2s ease, color .2s ease;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
 }
-.btn-primary:hover { transform: translateY(-1px); }
+.btn-primary:hover { transform: translateY(-1px); background: var(--gray-900); }
 .btn-primary:active { transform: translateY(0); }
+.btn-primary:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 
 .btn-ghost {
-  background: transparent;
-  color: var(--color-success);
-  border: 1px solid rgba(6,182,212,0.35);
+  background: var(--white);
+  color: var(--black);
+  border: 1px solid var(--gray-300);
   border-radius: 10px;
   padding: .45rem .7rem;
   font-weight: 600;
   cursor: pointer;
+  transition: background .15s ease, border-color .15s ease, box-shadow .15s ease;
 }
-.btn-ghost:hover { background: rgba(6,182,212,0.08); }
+.btn-ghost:hover { background: var(--gray-100); border-color: var(--gray-700); }
+.btn-ghost:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 
 .btn-danger {
-  background: transparent;
-  color: var(--color-error);
-  border: 1px solid rgba(239,68,68,0.35);
+  background: var(--white);
+  color: var(--black);
+  border: 1px solid var(--gray-300);
   border-radius: 10px;
   padding: .45rem .7rem;
   font-weight: 600;
   cursor: pointer;
+  transition: background .15s ease, border-color .15s ease, box-shadow .15s ease;
 }
-.btn-danger:hover { background: rgba(239,68,68,0.06); }
+.btn-danger:hover { background: var(--gray-100); border-color: var(--gray-700); }
+.btn-danger:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 
 /* Empty state */
 .empty-state {
@@ -192,7 +213,7 @@ body {
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(17, 24, 39, 0.45);
+  background: rgba(0,0,0,0.45);
   display: grid;
   place-items: center;
   padding: 1rem;
@@ -225,8 +246,8 @@ body {
 
 /* Forms */
 .form-field { margin-bottom: .85rem; display: grid; gap: .35rem; }
-.form-field label { font-weight: 600; font-size: .95rem; }
-.form-field .req { color: var(--color-error); margin-left: .2rem; }
+.form-field label { font-weight: 700; font-size: .95rem; }
+.form-field .req { color: var(--black); margin-left: .2rem; }
 .form-field input,
 .form-field textarea {
   border: 1px solid var(--border);
@@ -238,13 +259,15 @@ body {
   font-size: .95rem;
   color: var(--text);
 }
+.form-field input::placeholder,
+.form-field textarea::placeholder { color: var(--gray-500); }
 .form-field input:focus,
 .form-field textarea:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+  border-color: var(--black);
+  box-shadow: var(--focus-ring);
 }
 .error-text {
-  color: var(--color-error);
+  color: var(--black);
   font-size: .85rem;
 }
 
@@ -256,18 +279,19 @@ body {
   width: 56px;
   height: 56px;
   border-radius: 999px;
-  border: none;
-  background: var(--color-primary);
-  color: white;
+  border: 1px solid var(--black);
+  background: var(--black);
+  color: var(--white);
   font-size: 1.8rem;
   line-height: 0;
   display: grid;
   place-items: center;
-  box-shadow: 0 10px 25px rgba(59,130,246,0.35);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.35);
   cursor: pointer;
-  transition: transform .08s ease;
+  transition: transform .08s ease, box-shadow .15s ease, background .15s ease;
 }
-.fab:hover { transform: translateY(-1px); }
+.fab:hover { transform: translateY(-1px); background: var(--gray-900); }
+.fab:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 
 /* A11y helpers */
 .sr-only {
