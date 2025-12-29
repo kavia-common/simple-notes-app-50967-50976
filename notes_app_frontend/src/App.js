@@ -3,6 +3,7 @@ import './App.css';
 
 // Utilities
 const STORAGE_KEY = 'notes_app_data_v1';
+const THEME_KEY = 'notes_app_theme_v1';
 
 function generateId() {
   return `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
@@ -43,6 +44,20 @@ function formatDate(ts) {
   }
 }
 
+/** Determine initial theme based on localStorage or system preference. */
+function getInitialTheme() {
+  try {
+    const saved = localStorage.getItem(THEME_KEY);
+    if (saved === 'light' || saved === 'dark') return saved;
+  } catch {
+    // ignore
+  }
+  if (typeof window !== 'undefined' && window.matchMedia) {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  return 'light';
+}
+
 // PUBLIC_INTERFACE
 function App() {
   /** The main application rendering the notes UI. */
@@ -52,6 +67,7 @@ function App() {
   const [currentNote, setCurrentNote] = useState(null);
   const [titleError, setTitleError] = useState('');
   const [mounted, setMounted] = useState(false);
+  const [theme, setTheme] = useState(getInitialTheme());
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -64,6 +80,46 @@ function App() {
     if (!mounted) return;
     saveNotes(notes);
   }, [notes, mounted]);
+
+  // Apply theme to document root and persist
+  useEffect(() => {
+    const root = document.documentElement;
+    root.setAttribute('data-theme', theme);
+    try {
+      localStorage.setItem(THEME_KEY, theme);
+    } catch {
+      // ignore
+    }
+  }, [theme]);
+
+  // Sync with system preference changes if user hasn't explicitly set (only when no saved key)
+  useEffect(() => {
+    let media;
+    try {
+      const saved = localStorage.getItem(THEME_KEY);
+      if (saved === 'light' || saved === 'dark') {
+        return; // user choice takes precedence
+      }
+    } catch {
+      // continue to listen
+    }
+    if (window.matchMedia) {
+      media = window.matchMedia('(prefers-color-scheme: dark)');
+      const listener = (e) => setTheme(e.matches ? 'dark' : 'light');
+      if (media.addEventListener) {
+        media.addEventListener('change', listener);
+      } else {
+        media.addListener(listener);
+      }
+      return () => {
+        if (media.removeEventListener) {
+          media.removeEventListener('change', listener);
+        } else {
+          media.removeListener(listener);
+        }
+      };
+    }
+  }, []);
 
   // Debounce search input
   const [debouncedQuery, setDebouncedQuery] = useState('');
@@ -140,7 +196,12 @@ function App() {
 
   return (
     <div className="App app-root">
-      <Header query={query} setQuery={setQuery} />
+      <Header
+        query={query}
+        setQuery={setQuery}
+        theme={theme}
+        onToggleTheme={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
+      />
       <main className="container">
         {filteredSortedNotes.length === 0 ? (
           <EmptyState onCreate={openNewEditor} />
@@ -167,7 +228,7 @@ function App() {
   );
 }
 
-function Header({ query, setQuery }) {
+function Header({ query, setQuery, theme, onToggleTheme }) {
   return (
     <header className="header">
       <h1 className="app-title" aria-label="Notes application title">
@@ -185,6 +246,17 @@ function Header({ query, setQuery }) {
           aria-label="Search notes by title"
         />
       </div>
+      <button
+        className="theme-toggle"
+        onClick={onToggleTheme}
+        aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
+        title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
+      >
+        <span className="icon" aria-hidden="true">
+          {theme === 'dark' ? '🌙' : '☀️'}
+        </span>
+        <span>{theme === 'dark' ? 'Dark' : 'Light'}</span>
+      </button>
     </header>
   );
 }
