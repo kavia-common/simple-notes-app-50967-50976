@@ -6,12 +6,19 @@ A lightweight React app to add, edit, delete, search, and persist notes locally 
 - Create, edit (modal), and delete notes
 - Required title with inline validation
 - Timestamps for created and last updated
-- Search by title with debounce
+- Live search (title and body) with debounce and safe, multi-occurrence highlighting
 - Sort by last updated (desc)
 - Local persistence via `localStorage` under `notes_app_data_v1`
 - Accessible modal with focus management, keyboard friendly FAB and actions
 - Responsive, modern light and dark theme UI
 - Theme toggle with persistence via `localStorage` under `notes_app_theme_v1`
+
+## Search & Highlight
+- The search box in the header filters notes as you type (case-insensitive).
+- Notes are matched when the query appears in the title or the body.
+- All matched substrings in the rendered title and body are highlighted using semantic `<mark>` elements.
+- Highlighting is implemented safely (no dangerouslySetInnerHTML) by splitting text into React nodes.
+- Clearing the search shows all notes again.
 
 ## Theming
 - Toggle theme using the button in the header (Light/Dark with icon).

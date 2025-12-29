@@ -58,6 +58,41 @@ function getInitialTheme() {
   return 'light';
 }
 
+/**
+ * Safely creates highlighted React nodes for all occurrences of query in text.
+ * Case-insensitive. Returns the original string when query is falsy.
+ */
+function highlightMatches(text, query) {
+  const safeText = String(text ?? '');
+  const q = String(query ?? '').trim();
+  if (!q) return [safeText];
+
+  const lower = safeText.toLowerCase();
+  const target = q.toLowerCase();
+
+  const parts = [];
+  let index = 0;
+  let matchIndex = lower.indexOf(target);
+
+  while (matchIndex !== -1) {
+    if (matchIndex > index) {
+      parts.push(safeText.slice(index, matchIndex));
+    }
+    const matched = safeText.slice(matchIndex, matchIndex + target.length);
+    parts.push(
+      <mark key={`${matchIndex}-${matched}`} className="highlight">
+        {matched}
+      </mark>
+    );
+    index = matchIndex + target.length;
+    matchIndex = lower.indexOf(target, index);
+  }
+  if (index < safeText.length) {
+    parts.push(safeText.slice(index));
+  }
+  return parts.length ? parts : [safeText];
+}
+
 // PUBLIC_INTERFACE
 function App() {
   /** The main application rendering the notes UI. */
@@ -124,7 +159,7 @@ function App() {
   // Debounce search input
   const [debouncedQuery, setDebouncedQuery] = useState('');
   useEffect(() => {
-    const id = setTimeout(() => setDebouncedQuery(query.trim().toLowerCase()), 250);
+    const id = setTimeout(() => setDebouncedQuery(query.trim().toLowerCase()), 200);
     return () => clearTimeout(id);
   }, [query]);
 
@@ -161,8 +196,9 @@ function App() {
     if (currentNote.id) {
       // update
       setNotes((prev) =>
-        prev
-          .map((n) => (n.id === currentNote.id ? { ...n, title, body: currentNote.body || '', updatedAt: now } : n))
+        prev.map((n) =>
+          n.id === currentNote.id ? { ...n, title, body: currentNote.body || '', updatedAt: now } : n
+        )
       );
     } else {
       // insert
@@ -186,10 +222,15 @@ function App() {
     setNotes((prev) => prev.filter((n) => n.id !== id));
   }, []);
 
+  // Filter by title OR body, case-insensitive
   const filteredSortedNotes = useMemo(() => {
-    const items = notes.filter((n) =>
-      !debouncedQuery ? true : (n.title || '').toLowerCase().includes(debouncedQuery)
-    );
+    const q = debouncedQuery;
+    const items = notes.filter((n) => {
+      if (!q) return true;
+      const title = (n.title || '').toLowerCase();
+      const body = (n.body || '').toLowerCase();
+      return title.includes(q) || body.includes(q);
+    });
     // Sort by last updated desc
     return items.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
   }, [notes, debouncedQuery]);
@@ -208,6 +249,7 @@ function App() {
         ) : (
           <NotesList
             notes={filteredSortedNotes}
+            query={debouncedQuery}
             onEdit={openEditEditor}
             onDelete={removeNote}
           />
@@ -235,15 +277,15 @@ function Header({ query, setQuery, theme, onToggleTheme }) {
         Notes
       </h1>
       <div className="search-wrap">
-        <label className="sr-only" htmlFor="search-input">Search notes by title</label>
+        <label className="sr-only" htmlFor="search-input">Search notes by title or body</label>
         <input
           id="search-input"
           className="search-input"
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search by title…"
-          aria-label="Search notes by title"
+          placeholder="Search notes…"
+          aria-label="Search notes by title or body"
         />
       </div>
       <button
@@ -261,21 +303,29 @@ function Header({ query, setQuery, theme, onToggleTheme }) {
   );
 }
 
-function NotesList({ notes, onEdit, onDelete }) {
+function NotesList({ notes, query, onEdit, onDelete }) {
   return (
     <section className="notes-list" aria-label="Notes list">
       {notes.map((n) => (
-        <NoteCard key={n.id} note={n} onEdit={() => onEdit(n)} onDelete={() => onDelete(n.id)} />
+        <NoteCard
+          key={n.id}
+          note={n}
+          query={query}
+          onEdit={() => onEdit(n)}
+          onDelete={() => onDelete(n.id)}
+        />
       ))}
     </section>
   );
 }
 
-function NoteCard({ note, onEdit, onDelete }) {
+function NoteCard({ note, query, onEdit, onDelete }) {
   return (
     <article className="note-card" role="article" aria-labelledby={`title-${note.id}`}>
       <div className="note-card-header">
-        <h2 id={`title-${note.id}`} className="note-title">{note.title}</h2>
+        <h2 id={`title-${note.id}`} className="note-title">
+          {highlightMatches(note.title, query)}
+        </h2>
         <div className="note-actions">
           <button className="btn-ghost" onClick={onEdit} aria-label={`Edit note ${note.title}`}>
             ✏️ Edit
@@ -285,7 +335,7 @@ function NoteCard({ note, onEdit, onDelete }) {
           </button>
         </div>
       </div>
-      {note.body && <p className="note-body">{note.body}</p>}
+      {note.body && <p className="note-body">{highlightMatches(note.body, query)}</p>}
       <div className="note-meta">
         <span className="badge" title={`Created ${formatDate(note.createdAt)}`}>
           Created: {formatDate(note.createdAt)}

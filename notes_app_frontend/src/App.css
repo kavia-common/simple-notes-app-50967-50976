@@ -19,6 +19,10 @@
   --danger-hover: rgba(239,68,68,0.06);
   --focus-ring: rgba(59,130,246,0.15);
   --card-shadow-primary: rgba(59,130,246,0.35);
+
+  /* Highlight tokens (light) */
+  --highlight-bg: #fff3b0; /* warm light yellow */
+  --highlight-text: #111827;
 }
 
 /* Dark theme overrides */
@@ -40,6 +44,10 @@
   --danger-hover: rgba(239,68,68,0.1);
   --focus-ring: rgba(59,130,246,0.35);
   --card-shadow-primary: rgba(59,130,246,0.28);
+
+  /* Highlight tokens (dark) - tuned for contrast */
+  --highlight-bg: #3b82f6; /* use primary as pill background */
+  --highlight-text: #0b1220; /* dark text on bright bg for contrast */
 }
 
 * { box-sizing: border-box; }
@@ -330,4 +338,12 @@ body {
   padding: 0; margin: -1px;
   overflow: hidden; clip: rect(0, 0, 0, 0);
   white-space: nowrap; border: 0;
+}
+
+/* Search highlight */
+.highlight, mark.highlight, mark {
+  background: var(--highlight-bg);
+  color: var(--highlight-text);
+  padding: 0 .15em;
+  border-radius: 4px;
 }

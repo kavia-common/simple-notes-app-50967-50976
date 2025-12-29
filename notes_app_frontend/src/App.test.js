@@ -7,6 +7,12 @@ test('renders app title', () => {
   expect(title).toBeInTheDocument();
 });
 
+test('renders search input', () => {
+  render(<App />);
+  const search = screen.getByRole('searchbox', { name: /search notes/i });
+  expect(search).toBeInTheDocument();
+});
+
 test('renders theme toggle and toggles label', () => {
   render(<App />);
   const toggle = screen.getByRole('button', { name: /switch to/i });
